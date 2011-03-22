@@ -19,7 +19,13 @@
 		self.config = $.extend({
 			updateUrl: null,
 			updateTime: 3000,
-			counterPrefix: ''
+			counterPrefix: '',
+			success: function (data, $els, updater) {
+				$els.each(function (i, el) {
+					var keyName = $(el).attr('id').replace(updater.config.counterPrefix , '');
+					data[keyName] && $(el).html(data[keyName]);
+				});
+			}
 		}, options);
 		self.requestIsLive = false, time = new Date().getTime();
 
@@ -38,10 +44,7 @@
 				url: self.config.updateUrl,
 				dataType: 'json',
 				success: function (data) {
-					$self.each(function (i, el) {
-						var keyName = $(el).attr('id').replace(self.config.counterPrefix , '');
-						data[keyName] && $(el).html(data[keyName]);
-					});
+					$.isFunction(self.config.success) && self.config.success.call(self, data, $self, self);
 					self.requestIsLive = false;
 				},
 				error: function () {
